@@ -1,8 +1,53 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ReactNipple from 'react-nipple';
 
+function keyPressed(keyCode) {
+  let direction;
+  switch (keyCode) {
+    case 37:
+      if (direction !== 'right') {
+        direction = 'left';
+      }
+      break;
+    case 39:
+      if (direction !== 'left') {
+        direction = 'right';
+      }
+      break;
+    case 38:
+      if (direction !== 'down') {
+        direction = 'up';
+      }
+      break;
+    case 40:
+      if (direction !== 'up') {
+        direction = 'down';
+      }
+      break;
+    default:
+      break;
+  }
+  return direction;
+}
+
 const Control = ({ onMove }) => { // eslint-disable-line
+  useEffect(() => {
+    const readKeyboardButton = (e) => {
+      console.log(e.keyCode);
+      const direction = keyPressed(e.keyCode);
+      onMove(null, {
+        direction: {
+          angle: direction
+        }
+      });
+    };
+    window.addEventListener('keydown', readKeyboardButton);
+
+    return () => {
+      window.removeEventListener('keydown', readKeyboardButton);
+    };
+  }, []);
   return (
     <div>
       <ReactNipple

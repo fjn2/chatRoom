@@ -3,8 +3,25 @@ import PropTypes from 'prop-types';
 import P5 from 'p5';
 import 'p5/lib/addons/p5.dom'; // do not remove p5DOM
 
-const snakes = [];
+let snakes = [];
 const diff = 10;
+
+const avatarColors = [
+  '#E27D7A',
+  '#F27E18',
+  '#FEDF71',
+  '#8FB676',
+  '#7FAFD0',
+  '#9FA2A6'
+];
+
+const getColorByName = (name) => {
+  const numberByName = [...name].reduce((acc, val) => (
+    acc + val.charCodeAt(0)
+  ), 0);
+
+  return avatarColors[(numberByName % avatarColors.length)];
+};
 
 function addSnake(username) {
   const newSnake = {
@@ -15,11 +32,7 @@ function addSnake(username) {
     xCor: [],
     yCor: [],
     username,
-    color: [
-      Math.floor(Math.random() * 255),
-      Math.floor(Math.random() * 255),
-      Math.floor(Math.random() * 255)
-    ]
+    color: getColorByName(username)
   };
 
   for (let i = 0; i < newSnake.numSegments; i += 1) {
@@ -152,11 +165,12 @@ const Snake = ({ users }) => {
         function checkSnakeCollision({
           xCor,
           yCor,
+        }, {
+          headX,
+          headY
         }) {
-          const snakeHeadX = xCor[xCor.length - 1];
-          const snakeHeadY = yCor[yCor.length - 1];
           for (let i = 0; i < xCor.length - 1; i += 1) {
-            if (xCor[i] === snakeHeadX && yCor[i] === snakeHeadY) {
+            if (xCor[i] === headX && yCor[i] === headY) {
               return true;
             }
           }
@@ -189,14 +203,17 @@ const Snake = ({ users }) => {
             xCor,
             yCor,
           } = snake;
-          if (
+          const checkAllSnakeColission = snakes.map(sn => checkSnakeCollision(sn, {
+            headX: xCor[xCor.length - 1],
+            headY: yCor[yCor.length - 1]
+          }));
+          console.log('checkAllSnakeColission', checkAllSnakeColission);
+
+          return (
             xCor[xCor.length - 1] > p.width || xCor[xCor.length - 1] < 0
             || yCor[yCor.length - 1] > p.height
-            || yCor[yCor.length - 1] < 0 || checkSnakeCollision(snake)
-          ) {
-            // the snake has lost
-            resetSnake(snake);
-          }
+            || yCor[yCor.length - 1] < 0 || checkAllSnakeColission.includes(true)
+          );
         }
 
         /*
@@ -204,6 +221,7 @@ const Snake = ({ users }) => {
         and just insert the tail segment again at the start of the array (basically
         I add the last segment again at the tail, thereby extending the tail)
         */
+
         function checkForFruit(snake) {
           const {
             xCor,
@@ -225,7 +243,7 @@ const Snake = ({ users }) => {
 
         p.setup = () => { // eslint-disable-line
           p.createCanvas(500, 500);
-          p.frameRate(10);
+          p.frameRate(20);
           p.stroke(255);
           p.strokeWeight(10);
           updateFruitCoordinates();
@@ -236,13 +254,17 @@ const Snake = ({ users }) => {
           // console.log('snakes', snakes);
           snakes.forEach((snake) => {
             for (let i = 0; i < snake.numSegments - 1; i += 1) {
-              p.stroke(p.color(...snake.color));
+              p.stroke(p.color(snake.color));
               p.line(snake.xCor[i], snake.yCor[i], snake.xCor[i + 1], snake.yCor[i + 1]);
             }
             updateSnakeCoordinates(snake);
-            checkGameStatus(snake);
+            const hasLost = checkGameStatus(snake);
             checkForFruit(snake);
+            if (hasLost) {
+              snake.hasLost = true;
+            }
           });
+          snakes = snakes.filter(snake => !snake.hasLost);
         };
       }, canvasEl.current);
 
