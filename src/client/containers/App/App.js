@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useClient } from '../../state/client/hook';
+import Control from '../../components/Control';
 
 const App = () => {
   const [username, setUsername] = useState('');
@@ -13,7 +14,7 @@ const App = () => {
       <b>{state.username}</b>
       <br />
       Your ping is:
-      <b>{state.ping}</b>
+      <b>{`${state.ping} ms`}</b>
       <br />
       <input value={username} onChange={e => setUsername(e.target.value)} />
       <button
@@ -24,6 +25,13 @@ const App = () => {
       >
         change name
       </button>
+      <Control
+        onMove={(evt, data) => {
+          if (data.direction) {
+            actions.setDirection(data.direction.angle);
+          }
+        }}
+      />
     </div>
   );
 };

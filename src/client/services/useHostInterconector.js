@@ -11,7 +11,6 @@ const useHostInterconector = () => {
 
   useEffect(() => {
     interconector.subscribe('state', (data) => {
-      console.log('interconector', data);
       setValue(data);
     });
   }, []);

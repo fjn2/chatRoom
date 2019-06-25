@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHost } from '../../state/host/hook';
+import Snake from '../../components/Snake';
 
 const HostApp = () => {
   const [state] = useHost();
@@ -7,11 +8,9 @@ const HostApp = () => {
     <div>
       You are the HOST!
       <ul>
-        {/* {
-          messages.map(message => <li>{message}</li>)
-        } */}
         {JSON.stringify(state)}
       </ul>
+      <Snake users={state.state || []} />
     </div>
   );
 };

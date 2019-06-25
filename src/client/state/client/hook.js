@@ -14,8 +14,9 @@ const PING_SAMPLE_TIME = 1000;
 let pingTimeoutRef;
 
 export const ClientContext = ({ children }) => {
-  const [username, setUsername] = useInterconector();
-  const [ping, setPing] = useInterconector(0);
+  const [username, setUsername] = useInterconector('', 'username');
+  const [direction, setDirection] = useInterconector('right', 'direction');
+  const [ping, setPing] = useInterconector(0, 'ping');
 
   useEffect(() => {
     const pingSampling = (date) => {
@@ -38,9 +39,11 @@ export const ClientContext = ({ children }) => {
   return (
     <StoreContext.Provider value={[{
       username,
-      ping
+      ping,
+      direction
     }, {
-      setUsername
+      setUsername,
+      setDirection
     }]}
     >
       {children}

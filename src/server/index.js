@@ -23,6 +23,13 @@ app.get('/host.js', (req, res) => {
 const users = [];
 const hosts = [];
 
+// using throttled to avoid control the bandwidth
+const throttledSendStateToHost = throttle(() => {
+  if (hosts[0]) {
+    hosts[0].socket.emit('state', users.map(({ state }) => state));
+  }
+}, 100);
+
 io.on('connection', (socket) => {
   if (socket.handshake.query.isHost) {
     hosts.push({
@@ -39,11 +46,10 @@ io.on('connection', (socket) => {
   socket.on('message', (msg) => {
     const currentUser = users.find(user => user.socket === socket);
     currentUser.state[msg.id] = msg.value;
-    io.emit('message', msg);
+    socket.emit('message', msg);
+
     // send the new state to the host
-    if (hosts[0]) {
-      hosts[0].socket.emit('state', users.map(({ state }) => state));
-    }
+    throttledSendStateToHost();
   });
 
   socket.on('disconnect', () => {
